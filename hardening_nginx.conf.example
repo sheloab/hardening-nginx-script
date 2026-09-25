@@ -1,0 +1,49 @@
+# ============================================================
+#  hardening_nginx.conf  — configuration for hardening_nginx_v4.sh
+#
+#  Copy this file to hardening_nginx.conf and edit the values,
+#  then run:  sudo ./hardening_nginx_v4.sh hardening_nginx.conf
+#
+#  If NON_INTERACTIVE=no the script will prompt, using the
+#  values below as the defaults.
+# ============================================================
+
+# Run without any prompts (yes) or ask interactively (no).
+NON_INTERACTIVE=yes
+
+# Primary domain used in the example server block and log paths.
+DOMAIN="example.com"
+
+# Strict Content-Security-Policy. "yes" blocks inline scripts/styles
+# (safest, but can break apps that rely on them). "no" is permissive.
+STRICT_CSP=no
+
+# Add "preload" to the HSTS header. Only enable when the site and ALL
+# subdomains are HTTPS-only, and you intend to submit to hstspreload.org.
+HSTS_PRELOAD=no
+
+# HSTS max-age in seconds (31536000 = 1 year).
+HSTS_MAX_AGE=31536000
+
+# Install nginx automatically if it is not present.
+INSTALL_NGINX_IF_MISSING=yes
+
+# Install nginx-extras to enable more_clear_headers (hides the Server header).
+INSTALL_HEADERS_MORE=yes
+
+# Generate Diffie-Hellman parameters for stronger DHE ciphers.
+GENERATE_DHPARAM=yes
+DHPARAM_BITS=2048
+
+# Write rate-limiting zones (limit_req_zone / limit_conn_zone) into
+# hardening.conf. Set to "no" if you already define these elsewhere.
+ENABLE_RATE_LIMIT=yes
+
+# Maximum request body size (uploads).
+CLIENT_MAX_BODY_SIZE=100m
+
+# DNS resolvers used for OCSP stapling in server blocks.
+RESOLVERS="1.1.1.1 1.0.0.1 valid=300s"
+
+# Write a disabled example server block to conf.d for reference.
+CREATE_EXAMPLE_SERVER=yes
