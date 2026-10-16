@@ -11,6 +11,9 @@
 #   [FIX-4] reload falls back to restart, then to `nginx -s reload`
 #   [FIX-5] example server uses `listen ... ssl` + `http2 on;` (1.25+)
 #   [FIX-6] optional config file for non-interactive runs
+#   [FIX-7] IPv6-disabled hosts: comment out Debian's default-site
+#           `listen [::]:80 default_server;` before any apt install
+#           (nginx -t / package postinst error 97)
 #   [NEW]   modernised header defaults (X-XSS-Protection 0, no global
 #           Cache-Control, dropped obsolete block-all-mixed-content)
 #
@@ -74,6 +77,12 @@ has_headers_more() {
     shopt -u nullglob
     [ ${#mods[@]} -gt 0 ] && return 0
     nginx -V 2>&1 | grep -qiE 'headers.more'
+}
+
+# True if IPv6 is off (ipv6.disable=1 at boot, or disabled via sysctl).
+ipv6_disabled() {
+    [ ! -e /proc/sys/net/ipv6 ] && return 0
+    [ "$(cat /proc/sys/net/ipv6/conf/all/disable_ipv6 2>/dev/null)" = "1" ]
 }
 
 # ── log ───────────────────────────────────────────────────────
@@ -545,6 +554,26 @@ check_include() {
     fi
 }
 
+# ── STEP 3b: disable_ipv6_default_listener  [FIX-7] ───────────
+# With IPv6 off, Debian's default site line `listen [::]:80 default_server;`
+# makes nginx fail with
+# "socket() [::]:80 failed (97: Address family not supported by protocol)".
+# Runs after backup_config and before check_headers_more_module, so the
+# nginx-extras install can start nginx and finish configuring its packages.
+disable_ipv6_default_listener() {
+    ipv6_disabled || return 0
+    echo -e "\n${BLUE}[*] IPv6 disabled — checking for 'listen [::]:80 default_server'...${NC}"
+    build_scan_paths
+    local f
+    while IFS= read -r f; do
+        sed -i --follow-symlinks -E \
+            's/^([[:space:]]*)(listen[[:space:]]+\[::\]:80[[:space:]]+default_server)/\1# [IPv6 disabled] \2/' "$f"
+        echo -e "  ${GREEN}+ FIX${NC}   ${WHITE}${f}${NC}"
+        log "Commented out 'listen [::]:80 default_server' in $f"
+    done < <(grep -rlsE '^[[:space:]]*listen[[:space:]]+\[::\]:80[[:space:]]+default_server' \
+                 "${EXCLUDES[@]}" "${SCAN_PATHS[@]}" 2>/dev/null)
+}
+
 # ── restore_backup  [FIX-2] ───────────────────────────────────
 restore_backup() {
     echo -e "${YELLOW}[*] Rolling back...${NC}"
@@ -634,6 +663,7 @@ main() {
     check_root
     check_nginx
     backup_config
+    disable_ipv6_default_listener
     get_user_input
     check_headers_more_module
     preflight_scan
