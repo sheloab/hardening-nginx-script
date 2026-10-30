@@ -1428,7 +1428,8 @@ EOF
 
     cat > "$F2B_DIR/filter.d/nginx-bot.conf" << 'EOF'
 # Lines written by nginx (log_format bot_log) for dropped requests, e.g.
-# [30/Oct/2026:18:50:01 +0000] SCANNER IP=203.0.113.9 STATUS=444 UA="..." REQ="..."
+# (203.0.113.9 is a fake documentation address, RFC 5737)
+# [01/Jan/2026:00:00:00 +0000] SCANNER IP=203.0.113.9 STATUS=444 UA="..." REQ="..."
 # bots.log only receives requests that were dropped; honeypot.log only
 # receives requests for honeypot paths. Every line is a ban.
 [Definition]

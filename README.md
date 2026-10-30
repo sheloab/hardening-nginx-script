@@ -200,7 +200,7 @@ re-runs of the script.
 
 ```bash
 sudo fail2ban-client status nginx-bot
-sudo fail2ban-client set nginx-bot unbanip 203.0.113.9
+sudo fail2ban-client set nginx-bot unbanip 203.0.113.9   # example address, see below
 ```
 
 Both jails set `backend = auto`. Many hardened systems set
@@ -293,6 +293,18 @@ Run v5 the same way. It replaces its own generated files and keeps
 The variables used by the older bot blocker (`$bot_class`, `$bot_action`,
 `$bot_label`, `$bot_log_file`, `$ip_blocked`) are still defined, so server blocks
 written for it keep working.
+
+## About the IP addresses in this repository
+
+No address in this repository belongs to the author or to any real visitor.
+Every address is one of these:
+
+| Address | What it is |
+|---|---|
+| `203.0.113.9`, `198.51.100.7`, `203.0.113.0/24` | **Fake example addresses.** They come from the blocks that RFC 5737 reserves for documentation (`192.0.2.0/24`, `198.51.100.0/24`, `203.0.113.0/24`), which are never assigned to anyone and never routed on the internet. Replace them with your own values. |
+| `127.0.0.1`, `127.0.0.0/8`, `::1` | Localhost: the server itself. Never banned. |
+| `1.1.1.1`, `1.0.0.1` | Cloudflare's public DNS resolvers: the default for `RESOLVERS` (OCSP stapling). Change them if you prefer another resolver. |
+| `173.245.48.0/20`, `2400:cb00::/32`, ... | Cloudflare's published proxy ranges, built in as a fallback for `BEHIND_CLOUDFLARE=yes`. At run time the script downloads the current list from `https://www.cloudflare.com/ips-v4` and `/ips-v6`. |
 
 ## License
 

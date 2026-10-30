@@ -75,6 +75,8 @@ BAN_TIME=604800
 
 # Your own addresses: never dropped, logged or banned (space-separated,
 # IPs or CIDR ranges). 127.0.0.1 and ::1 are always included.
+# Example (fake documentation addresses, RFC 5737 - use your own):
+#   BAN_IGNORE_IPS="198.51.100.7 203.0.113.0/24"
 BAN_IGNORE_IPS=""
 
 # The site is behind Cloudflare's proxy: take the visitor's address from
