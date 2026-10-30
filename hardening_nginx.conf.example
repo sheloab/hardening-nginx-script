@@ -1,8 +1,8 @@
 # ============================================================
-#  hardening_nginx.conf  — configuration for hardening_nginx_v4.sh
+#  hardening_nginx.conf  — configuration for hardening_nginx_v5.sh
 #
 #  Copy this file to hardening_nginx.conf and edit the values,
-#  then run:  sudo ./hardening_nginx_v4.sh hardening_nginx.conf
+#  then run:  sudo ./hardening_nginx_v5.sh hardening_nginx.conf
 #
 #  If NON_INTERACTIVE=no the script will prompt, using the
 #  values below as the defaults.
@@ -47,3 +47,36 @@ RESOLVERS="1.1.1.1 1.0.0.1 valid=300s"
 
 # Write a disabled example server block to conf.d for reference.
 CREATE_EXAMPLE_SERVER=yes
+
+# ── BOT & SCANNER BLOCKER ────────────────────────────────────
+# Drop scanners, scripts (curl, python-requests, ...), empty user-agents
+# and unknown bots with 444 (no answer). A site is protected once its
+# server{} block contains:  include /etc/nginx/snippets/bot-response.conf;
+ENABLE_BOT_BLOCKER=yes
+
+# Also drop AI-training crawlers and SEO scrapers (GPTBot, CCBot, Ahrefs...).
+BLOCK_AI_CRAWLERS=yes
+
+# Also drop search engines and link previews (Google, Bing, Slack...).
+# Only for private sites that must not be indexed.
+BLOCK_SEARCH_ENGINES=no
+
+# Add the include line to every server{} block in sites-enabled now.
+# Undone automatically if the new config fails nginx -t.
+BOT_AUTO_INCLUDE=no
+
+# Ban the IPs of dropped bots, honeypot hits and hidden-file probes
+# (/.env, /.git/...) with fail2ban. Bans are enforced inside nginx.
+ENABLE_FAIL2BAN=yes
+INSTALL_FAIL2BAN=yes
+
+# Ban length in seconds (604800 = 7 days).
+BAN_TIME=604800
+
+# Your own addresses: never dropped, logged or banned (space-separated,
+# IPs or CIDR ranges). 127.0.0.1 and ::1 are always included.
+BAN_IGNORE_IPS=""
+
+# The site is behind Cloudflare's proxy: take the visitor's address from
+# CF-Connecting-IP and never ban Cloudflare's own addresses.
+BEHIND_CLOUDFLARE=no
